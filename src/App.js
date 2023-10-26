@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Row, Col } from "antd";
+import { Button, Row, Col, message } from "antd";
 import {
   UndoOutlined,
   ClearOutlined,
@@ -31,7 +31,11 @@ function App() {
     const smallContext = smallCanvas.getContext("2d");
 
     // Use pica to resize the canvas
-    await picaInstance.resize(canvas, smallCanvas);
+    try {
+      await picaInstance.resize(canvas, smallCanvas);
+    } catch (error) {
+      message.info("Please disable shields for the prediction to work!");
+    }
 
     let smallImageData = smallContext.getImageData(
       0,
@@ -115,6 +119,33 @@ function App() {
       </Row>
 
       <Row gutter={[16, 16]}>
+        <Col xs={24} sm={24} md={8}>
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={24} md={12}>
+              <Row justify="center">
+                <Col span={24} style={{ textAlign: "center" }}>
+                  <span style={{ color: "gray", fontSize: 20 }}>
+                    Probablity :
+                  </span>
+                  <span style={{ fontSize: 25, margin: 5 }}>
+                    {prob}
+                    {prob ? "%" : ""}
+                  </span>
+                </Col>
+              </Row>
+              <Row justify="center">
+                <Col span={24} style={{ textAlign: "center" }}>
+                  <h1 style={{ padding: 0, margin: 0, color: "gray" }}>
+                    Prediction :
+                  </h1>
+                  <h1 style={{ fontSize: 200, padding: 0, margin: 0 }}>
+                    {pred}
+                  </h1>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Col>
         <Col xs={24} sm={24} md={16}>
           <Row justify="centers">
             <Col span={24}>
@@ -156,33 +187,6 @@ function App() {
               >
                 Predict Digit
               </Button>
-            </Col>
-          </Row>
-        </Col>
-        <Col xs={24} sm={24} md={8}>
-          <Row gutter={[16, 16]}>
-            <Col xs={24} sm={24} md={12}>
-              <Row justify="center">
-                <Col span={24} style={{ textAlign: "center" }}>
-                  <span style={{ color: "gray", fontSize: 20 }}>
-                    Probablity :
-                  </span>
-                  <span style={{ fontSize: 25, margin: 5 }}>
-                    {prob}
-                    {prob ? "%" : ""}
-                  </span>
-                </Col>
-              </Row>
-              <Row justify="center">
-                <Col span={24} style={{ textAlign: "center" }}>
-                  <h1 style={{ padding: 0, margin: 0, color: "gray" }}>
-                    Prediction :
-                  </h1>
-                  <h1 style={{ fontSize: 200, padding: 0, margin: 0 }}>
-                    {pred}
-                  </h1>
-                </Col>
-              </Row>
             </Col>
           </Row>
         </Col>
