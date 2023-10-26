@@ -33,39 +33,45 @@ function App() {
     // Use pica to resize the canvas
     try {
       await picaInstance.resize(canvas, smallCanvas);
+
+      let smallImageData = smallContext.getImageData(
+        0,
+        0,
+        smallCanvas.width,
+        smallCanvas.height
+      );
+      // console.log(smallImageData);
+      let grayscaleValues = [];
+      for (let i = 3; i < smallImageData.data.length; i += 4) {
+        grayscaleValues.push(smallImageData.data[i]);
+      }
+      // console.log(grayscaleValues.length);
+      return grayscaleValues;
     } catch (error) {
       message.info("Please disable shields for the prediction to work!");
+      return null;
     }
-
-    let smallImageData = smallContext.getImageData(
-      0,
-      0,
-      smallCanvas.width,
-      smallCanvas.height
-    );
-    // console.log(smallImageData);
-    let grayscaleValues = [];
-    for (let i = 3; i < smallImageData.data.length; i += 4) {
-      grayscaleValues.push(smallImageData.data[i]);
-    }
-    // console.log(grayscaleValues.length);
-    return grayscaleValues;
   };
 
   async function predict() {
     await loadModel();
     const imageArray = await saveDrawing(); //imamgeArray is if length 784
     // console.log(imageArray);
-    const digit = tf.tensor2d(imageArray, [1, 784], "int32");
-    // console.log(digit);
-    const inference = model.predict(digit);
-    const prediction = inference.argMax(1);
-    const probablity = inference.max();
-    setProb((probablity.dataSync()[0] * 100).toFixed(2));
-    // probablity.print()
-    setPred(prediction.dataSync()[0]);
-    // console.log(prediction.dataSync()[0]);
-    // setPred(prediction)
+    if (imageArray) {
+      let digit = tf.tensor2d(imageArray, [1, 784], "float32");
+      // console.log(digit);
+      digit = digit.reshape([-1, 28, 28, 1]);
+      const inference = model.predict(digit);
+      const prediction = inference.argMax(1);
+      const probablity = inference.max();
+      setProb((probablity.dataSync()[0] * 100).toFixed(2));
+      // probablity.print()
+      setPred(prediction.dataSync()[0]);
+      // console.log(prediction.dataSync()[0]);
+      // setPred(prediction)
+    } else {
+      message.error("something went wrong!");
+    }
   }
 
   // now load the model
@@ -85,14 +91,14 @@ function App() {
     onChange: null,
     loadTimeOffset: 0.0001,
     lazyRadius: 20,
-    brushRadius: 30,
+    brushRadius: 25,
     brushColor: "#000",
     catenaryColor: "#fff",
     backgroundColor: "#fff",
     gridColor: "rgba(150,150,150,0.17)",
     hideGrid: true,
-    canvasWidth: 512,
-    canvasHeight: 512,
+    canvasWidth: 400,
+    canvasHeight: 400,
     disabled: false,
     imgSrc: "",
     saveData: null,
@@ -125,7 +131,7 @@ function App() {
               <Row justify="center">
                 <Col span={24} style={{ textAlign: "center" }}>
                   <span style={{ color: "gray", fontSize: 20 }}>
-                    Probablity :
+                    Probability :
                   </span>
                   <span style={{ fontSize: 25, margin: 5 }}>
                     {prob}
